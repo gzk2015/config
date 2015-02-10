@@ -1,0 +1,123 @@
+logstash配置过程
+适用于logstash1.4版本
+
+一、
+
+下载
+
+curl -O https://download.elasticsearch.org/logstash/logstash/logstash-1.4.0.tar.gz
+
+解压安装（此处解压即可，无需进行编译，有点类似tomcat)
+
+tar -zxvf logstash-1.4.0.tar.gz
+cd logstash-1.4.0
+
+
+logstash.conf
+
+注意：
+logstash1.4不提供任何配置文件，需要自己创建
+
+
+基本格式：
+根据这个来编辑自己的配置文件，最后会附上几个例子。
+	
+bin/logstash -e 'input { stdin { } } output { stdout {} }'  
+
+
+logstash1.4 已经集成了kibana软件，运行以下命令运行即可：
+
+bin/logstash web &  （这是index端需要启用的）
+
+
+二、储存数据到elasticsearch(此处elasticsearch提供数据存储统计功能）
+
+curl -O https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.0.1.tar.gz
+
+tar zxvf elasticsearch-1.0.1.tar.gz
+cd elasticsearch-1.0.1/
+
+！！！同样这里不存在配置文件，也不需要，只要启动就可以。
+
+
+至此logstash的基本功能就算配置完毕，以你自己的配置文件启动agent端收集日志：  bin/logstash -f logstash.conf
+
+
+
+
+logstash.conf配置文件示例
+
+
+###################################################################################
+nginx-access
+
+input { 
+	file {
+		type => "nginx-access"
+		path => ["/usr/local/nginx/logs/nginx-access.log"]
+		codec => plain {
+      			charset => "UTF-8"
+  		}
+	}
+}
+filter {
+	if [type] == "nginx-access" { 
+		grok { 
+			patterns_dir => ["/usr/local/loganalysis/patterns"]
+			match => [ 
+				"message", 
+				"%{NGINXACCESSLOG}"
+			] 
+		}
+		useragent {
+			source => "agent"
+			target => "useragent_"
+		}
+	}
+	
+}
+output { 
+   elasticsearch {
+    host => localhost
+  }
+}
+
+
+
+###################################################################################
+
+
+apache access
+
+input {
+  file {
+    path => "/tmp/access_log"
+    start_position => beginning
+  }
+}
+
+filter {
+  if [path] =~ "access" {
+    mutate { replace => { "type" => "apache_access" } }
+    grok {
+      match => { "message" => "%{COMBINEDAPACHELOG}" }
+    }
+  }
+  date {
+    match => [ "timestamp" , "dd/MMM/yyyy:HH:mm:ss Z" ]
+  }
+}
+
+output {
+  elasticsearch {
+    host => localhost
+  }
+  stdout { codec => rubydebug }
+}
+
+####################################################################################
+
+
+
+
+

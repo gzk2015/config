@@ -19,17 +19,17 @@ report=file('/root/bin/log_report/report.txt','w')
 
 def mailto(rec_list,mail_content):
 
-    sender='guanzhongkai@cyou-inc.com'
-    smtpserver='cyou-inc.com'
+    sender=-.com'
+    smtpserver='.com'
     user='guanzhongkai'
-    passwd='07101986g'
+    passwd=''
     content = file(mail_content ).read()
     msg=MIMEText(content,'plain')
     msg['From']=sender
     msg['Subject']="PV last week of Mobile-BU"
     msg['To']=",".join(rec_list)
     smtp=smtplib.SMTP()
-    smtp.connect('smtp.cyou-inc.com','587')
+    smtp.connect('','')
     smtp.starttls()
 #    smtp.set_debuglevel(1)
     smtp.login(user,passwd)
@@ -43,14 +43,14 @@ try:
     conn=MySQLdb.connect(host='10.59.94.80',user='gtuser',passwd='7475sys',db='gtsys',port=3306,charset='utf8',cursorclass=MySQLdb.cursors.DictCursor)
     cur=conn.cursor()
 
-#17173app's report
+
     cmd="select datetime,log_name,sum(pv) as sum  from log_analyze where log_name like %s and datetime=%s group by log_name"
 
 
     h1=file('.head1','r').readlines()
     report.writelines(h1)
     for D in date_list:
-        cur.execute(cmd,("a.17173.com.access%",D))
+        cur.execute(cmd,(".access%",D))
 	res=cur.fetchall()	
 	if res is  ():pass
 	else:
@@ -64,7 +64,7 @@ try:
     
     report.writelines(file('.head2','r').readlines())
     for D in date_list:
-	cur.execute(cmd,("m.app.shouyou.com.access%",D))
+	cur.execute(cmd,("m.com.access%",D))
 	res1=cur.fetchall()
 	data1="%s        %s\n" %(D,res1[0]['sum'])
 #	print data1
@@ -99,6 +99,6 @@ report.close()
 
 
 if os.path.exists('report.txt'):
-#    mailto(['zhiyongma@17173-inc.com','yongzhijiao@cyou-inc.com','liujijun@17173-inc.com','kunlin@cyou-inc.com','gangxu@cyou-inc.com','guanzhongkai@cyou-inc.com'],'report.txt')
-    mailto(['guanzhongkai@cyou-inc.com','liujijun@cyou-inc.com'],'report.txt')
+
+    mailto(['',''],'report.txt')
 
